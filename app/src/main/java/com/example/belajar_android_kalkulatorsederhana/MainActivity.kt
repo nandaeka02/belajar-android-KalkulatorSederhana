@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
@@ -26,8 +25,8 @@ class MainActivity : AppCompatActivity() {
             findViewById(R.id.btn8),
             findViewById(R.id.btn9),
             findViewById(R.id.btn0),
-            findViewById(R.id.btn00),
-            findViewById(R.id.btn000),
+            findViewById(R.id.btnAC),
+            findViewById(R.id.btnComma),
             findViewById(R.id.btnPlus),
             findViewById(R.id.btnMin),
             findViewById(R.id.btnMultiple),
@@ -67,14 +66,107 @@ class MainActivity : AppCompatActivity() {
             inputBtn(etnumber,1,"0")
         }
         getBtn[10].setOnClickListener {
-            inputBtn(etnumber,2,"00")
+            etnumber.setText("")
         }
         getBtn[11].setOnClickListener {
-            inputBtn(etnumber,3,"000")
+            if(etnumber.text.length == 0){
+                etnumber.setText("0.")
+                etnumber.setSelection(etnumber.text.length)
+            }else{
+                var numString = etnumber.text.toString().split("+","-","/","x")
+                var numSeparator = numString.size - 1
+                var numStringLen = 0
+                var indexPosition = etnumber.selectionStart -1
+                var indexArrPosition = 0
+                Log.d("numSeparator", "${numSeparator}")
+                Log.d("numSeparator", "${numString}")
+                for (string in numString){
+                    if(numSeparator > 0){
+                        numStringLen = numStringLen + string.length + 1
+                        if(numStringLen == indexPosition){
+                            Log.d("ETNumber", "${numString[indexArrPosition].toDouble()}")
+                            if(!isDouble(numString[indexArrPosition].toDouble())){
+                                inputBtn(etnumber,1,".")
+                                break
+                            }
+                        }
+                    }else{
+                        numStringLen = numStringLen + string.length -1
+                        if(numStringLen == indexPosition){
+                            Log.d("ETNumber1", "${numString}")
+                            if(!isDouble(numString[indexArrPosition].toDouble())){
+                                if(!(etnumber.text.toString()[etnumber.selectionStart -1] == '.')){
+                                    inputBtn(etnumber,1,".")
+                                    break
+                                }
+                            }else{
+                                Log.d("ETNumber2", "${numString[indexArrPosition]}")
+                            }
+                        }else{
+                            Log.d("ETNumber3", "${numString[indexArrPosition]}")
+                        }
+
+//                        inputBtn(etnumber,1,".")
+//                        break
+                    }
+                    numSeparator--
+                    indexArrPosition++
+                }
+
+
+//                for(range in etnumber.selectionStart downTo 0){
+//                    if(etnumber.text.toString()[range] == '+' || etnumber.text.toString()[range] == '-' || etnumber.text.toString()[range] == 'x' || etnumber.text.toString()[range] == '/'){
+//                        for(findCommatoleft in etnumber.selectionStart downTo range){
+//                            if(!(etnumber.text.toString()[findCommatoleft] == '.')){
+//                                inputBtn(etnumber,3,".")
+//                                break
+//                            }
+//                        }
+//                        break
+//                    }else{
+//                        for(findCommatoleft in etnumber.selectionStart downTo range){
+//                            if(!(etnumber.text.toString()[findCommatoleft] == '.')){
+//                                inputBtn(etnumber,3,".")
+//                                break
+//                            }else{
+//                                for (rangetoright in 0..etnumber.selectionStart){
+//                                    if(etnumber.text.toString()[range] == '+' || etnumber.text.toString()[range] == '-' || etnumber.text.toString()[range] == 'x' || etnumber.text.toString()[range] == '/'){
+//                                        for (findCommatoright in 0..rangetoright){
+//                                            if(!(etnumber.text.toString()[findCommatoright] == '.')){
+//                                                inputBtn(etnumber,3,".")
+//                                                break
+//                                            }
+//                                        }
+//                                        break
+//                                    }
+//                                }
+//                                break
+//                            }
+//                        }
+//                    }
+//
+//                }
+            }
+
         }
         getBtn[12].setOnClickListener {
-            if(!(etnumber.selectionStart-1 < 0))
-                inputBtn(etnumber,1,"+")
+            if(!(etnumber.selectionStart-1 < 0)) {
+                inputBtn(etnumber, 1, "+")
+//                if (etnumber.text.toString()[etnumber.selectionStart - 1] == '+' ||
+//                    etnumber.text.toString()[etnumber.selectionStart - 1] == '-' ||
+//                    etnumber.text.toString()[etnumber.selectionStart - 1] == 'x' ||
+//                    etnumber.text.toString()[etnumber.selectionStart - 1] == '/' ||
+//                    etnumber.text.toString()[etnumber.selectionStart + 1] == '+' ||
+//                    etnumber.text.toString()[etnumber.selectionStart + 1] == '-' ||
+//                    etnumber.text.toString()[etnumber.selectionStart + 1] == 'x' ||
+//                    etnumber.text.toString()[etnumber.selectionStart + 1] == '/'
+//                ) {
+//                    Log.d("ETNumber", "${etnumber.text.toString()[etnumber.selectionStart - 1]}")
+//                } else {
+//                    inputBtn(etnumber, 1, "+")
+//                    Log.d("ETNumber", "${etnumber.text.toString()[etnumber.selectionStart - 1]}")
+//                }
+            }
         }
         getBtn[13].setOnClickListener {
             if(!(etnumber.selectionStart-1 < 0))
@@ -90,8 +182,9 @@ class MainActivity : AppCompatActivity() {
 
         }
         getBtn[16].setOnClickListener {
+            Log.d("testev","${etnumber.text.toString()[0]}")
             val sep: Array<String> = arrayOf("+","-","x","/")
-            var hasil = 0
+            var hasil: Double
             var sepTxt: MutableList<String> = mutableListOf()
             for(text in etnumber.text.toString()){
                 when (text){
@@ -110,30 +203,35 @@ class MainActivity : AppCompatActivity() {
             while (true){
                 if(sepTxt.contains("+")||sepTxt.contains("-")||sepTxt.contains("x")||sepTxt.contains("/")){
                     if(sepTxt.contains("x")){
-                        sepTxt[sepTxt.indexOf("x")-1] = (sepTxt[sepTxt.indexOf("x")-1].toInt() * sepTxt[sepTxt.indexOf("x")+1].toInt()).toString()
+                        sepTxt[sepTxt.indexOf("x")-1] = (sepTxt[sepTxt.indexOf("x")-1].toDouble() * sepTxt[sepTxt.indexOf("x")+1].toDouble()).toString()
                         sepTxt.removeAt(sepTxt.indexOf("x")+1)
                         sepTxt.removeAt(sepTxt.indexOf("x"))
                     }else if(sepTxt.contains("/")){
-                        sepTxt[sepTxt.indexOf("/")-1] = (sepTxt[sepTxt.indexOf("/")-1].toInt() / sepTxt[sepTxt.indexOf("/")+1].toInt()).toString()
+                        sepTxt[sepTxt.indexOf("/")-1] = (sepTxt[sepTxt.indexOf("/")-1].toDouble() / sepTxt[sepTxt.indexOf("/")+1].toDouble()).toString()
                         sepTxt.removeAt(sepTxt.indexOf("/")+1)
                         sepTxt.removeAt(sepTxt.indexOf("/"))
                     }else{
                         if(sepTxt.contains("+")){
-                            sepTxt[sepTxt.indexOf("+")-1] = (sepTxt[sepTxt.indexOf("+")-1].toInt() + sepTxt[sepTxt.indexOf("+")+1].toInt()).toString()
+                            sepTxt[sepTxt.indexOf("+")-1] = (sepTxt[sepTxt.indexOf("+")-1].toDouble() + sepTxt[sepTxt.indexOf("+")+1].toDouble()).toString()
                             sepTxt.removeAt(sepTxt.indexOf("+")+1)
                             sepTxt.removeAt(sepTxt.indexOf("+"))
                         }else if(sepTxt.contains("-")){
-                            sepTxt[sepTxt.indexOf("-")-1] = (sepTxt[sepTxt.indexOf("-")-1].toInt() - sepTxt[sepTxt.indexOf("-")+1].toInt()).toString()
+                            sepTxt[sepTxt.indexOf("-")-1] = (sepTxt[sepTxt.indexOf("-")-1].toDouble() - sepTxt[sepTxt.indexOf("-")+1].toDouble()).toString()
                             sepTxt.removeAt(sepTxt.indexOf("-")+1)
                             sepTxt.removeAt(sepTxt.indexOf("-"))
                         }
                     }
                 }else{
-                    hasil = sepTxt[0].toInt()
+                    hasil = sepTxt[0].toDouble()
                     break
                 }
             }
-            etnumber.setText("$hasil")
+            if(isDouble(hasil) == true){
+                etnumber.setText("$hasil")
+            }else{
+                etnumber.setText("${hasil.toInt()}")
+            }
+
             etnumber.setSelection(etnumber.length())
             Log.d("ResultCalc","$sepTxt")
 
@@ -159,6 +257,17 @@ class MainActivity : AppCompatActivity() {
             hideKeyboard()
         }
     }
+    fun isDouble(numberParam: Double): Boolean{
+        var isTrue = true
+        Log.d("isDouble","${numberParam}")
+        if(numberParam == 0.toDouble() || numberParam - numberParam.toInt() == 0.toDouble() || (numberParam - numberParam.toInt()).isNaN() == true){
+            isTrue = false
+        }else if(numberParam - numberParam.toInt() != 0.toDouble()){
+            isTrue = true
+        }
+        return isTrue
+    }
+
     fun inputBtn(any: EditText, length: Int,text: String){
         if (any.selectionStart == any.length()){
             any.setText("${any.text.toString() + text}")
